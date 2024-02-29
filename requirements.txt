@@ -1,0 +1,5 @@
+regex
+ftfy
+scipy
+pillow
+openvino==2023.3
