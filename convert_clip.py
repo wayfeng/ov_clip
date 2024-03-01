@@ -1,6 +1,7 @@
 import sys
 import argparse
 import torch
+import torch.nn.functional as F
 import open_clip
 import openvino as ov
 import warnings
@@ -8,13 +9,11 @@ warnings.filterwarnings("ignore", category=torch.jit.TracerWarning)
 
 
 class TextTransformer(torch.nn.Module):
-    def __init__(self, model):  # , tokenizer):
+    def __init__(self, model):
         super().__init__()
         self.model = model
-        # self.tokenizer = tokenizer
 
     def forward(self, text):
-        # token = tokenizer(text)
         cast_dtype = self.model.transformer.get_cast_dtype()
         x = self.model.token_embedding(text).to(
             cast_dtype)  # [batch_size, n_ctx, d_model]
@@ -25,9 +24,8 @@ class TextTransformer(torch.nn.Module):
         x = x.permute(1, 0, 2)  # LND -> NLD
         x = self.model.ln_final(x)  # [batch_size, n_ctx, transformer.width]
         # take features from the eot embedding (eot_token is the highest number in each sequence)
-        x = x[torch.arange(x.shape[0]), text.argmax(dim=-1)
-              ] @ self.model.text_projection
-        return x  # F.normalize(x, dim=-1) if normalize else x
+        x = x[torch.arange(x.shape[0]), text.argmax(dim=-1)] @ self.model.text_projection
+        return F.normalize(x, dim=-1)
 
 
 if __name__ == '__main__':
@@ -54,7 +52,6 @@ if __name__ == '__main__':
     pretrained = args.ckpt_path
     model, _, preprocess = open_clip.create_model_and_transforms(
         args.model_id, pretrained=pretrained)
-    # tokenizer = open_clip.get_tokenizer(model_id)
     batch = args.batch
     if args.seperated:
         # convert visual transformer
