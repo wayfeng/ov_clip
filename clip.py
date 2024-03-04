@@ -6,17 +6,18 @@ from tokenizer import tokenize
 
 import openvino as ov
 import numpy as np
+import openvino.properties.hint as hints
 
 def load_model(image_encoder_path, text_encoder_path, device, throughputmode=False):
     core = ov.Core()
+    core.set_property(device, {hints.inference_precision: ov.Type.f32})
     ie = core.read_model(image_encoder_path)
     te = core.read_model(text_encoder_path)
+    config = {}
     if throughputmode:
-        ienc = core.compile_model(ie, device.upper(), {'PERFORMANCE_HINT': 'THROUGHPUT'})
-        tenc = core.compile_model(te, device.upper(), {'PERFORMANCE_HINT': 'THROUGHPUT'})
-    else:
-        ienc = core.compile_model(ie, device.upper())
-        tenc = core.compile_model(te, device.upper())
+        config["PERFORMANCE_HINT"] = "THROUGHPUT"
+    ienc = core.compile_model(ie, device.upper(), config)
+    tenc = core.compile_model(te, device.upper(), config)
     #model.max_text_len = 256
     return ienc, tenc
 
