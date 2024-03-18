@@ -10,7 +10,7 @@ import openvino.properties.hint as hints
 
 def load_model(image_encoder_path, text_encoder_path, device, throughputmode=False):
     core = ov.Core()
-    core.set_property(device, {hints.inference_precision: ov.Type.f32})
+    #core.set_property(device, {hints.inference_precision: ov.Type.f32})
     ie = core.read_model(image_encoder_path)
     te = core.read_model(text_encoder_path)
     config = {}

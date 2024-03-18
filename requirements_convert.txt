@@ -1,4 +1,4 @@
 torch
 torchvision
-openvino==2023.3.0
+openvino==2024.0
 git+https://github.com/mlfoundations/open_clip@5f7892b672b21e6853d0f6c11b18dda9bcf36c8d

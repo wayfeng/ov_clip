@@ -2,4 +2,4 @@ regex
 ftfy
 scipy
 pillow
-openvino==2023.3
+openvino==2024.0

@@ -25,7 +25,7 @@ class TextTransformer(torch.nn.Module):
         x = self.model.ln_final(x)  # [batch_size, n_ctx, transformer.width]
         # take features from the eot embedding (eot_token is the highest number in each sequence)
         x = x[torch.arange(x.shape[0]), text.argmax(dim=-1)] @ self.model.text_projection
-        return F.normalize(x, dim=-1)
+        return x #F.normalize(x, dim=-1)
 
 
 if __name__ == '__main__':
