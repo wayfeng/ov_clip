@@ -1,6 +1,6 @@
 # OpenCLIP with OpenVINO
 
-Original OpenCLIP [repo](https://github.com/mlfoundations/open_clip.git)
+Original OpenCLIP [repo](https://github.com/mlfoundations/open_clip.git) and [models](https://huggingface.co/models?library=open_clip&sort=trending&search=laion2b).
 
 ## To convert model
 ```bash
