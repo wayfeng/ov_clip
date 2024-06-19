@@ -14,19 +14,7 @@ class TextTransformer(torch.nn.Module):
         self.model = model
 
     def forward(self, text):
-        cast_dtype = self.model.transformer.get_cast_dtype()
-        x = self.model.token_embedding(text).to(
-            cast_dtype)  # [batch_size, n_ctx, d_model]
-
-        x = x + self.model.positional_embedding.to(cast_dtype)
-        x = x.permute(1, 0, 2)  # NLD -> LND
-        x = self.model.transformer(x, attn_mask=self.model.attn_mask)
-        x = x.permute(1, 0, 2)  # LND -> NLD
-        x = self.model.ln_final(x)  # [batch_size, n_ctx, transformer.width]
-        # take features from the eot embedding (eot_token is the highest number in each sequence)
-        x = x[torch.arange(x.shape[0]), text.argmax(dim=-1)] @ self.model.text_projection
-        return x #F.normalize(x, dim=-1)
-
+        return self.model.encode_text(text)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -39,6 +27,8 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--batch', default=1, help='default batch size')
     parser.add_argument('-s', '--seperated', default=True, action='store_true',
                         help='whether sperate the OpenCLIP model to image encoder and text encoder')
+    parser.add_argument('--static_text', default=True,  action='store_true',
+                        help='whether convert text encoder with static input size')
     parser.add_argument('--fp16', default=True,  action='store_true',
                         help='whether save model as fp16 mode')
 
@@ -53,6 +43,9 @@ if __name__ == '__main__':
     model, _, preprocess = open_clip.create_model_and_transforms(
         args.model_id, pretrained=pretrained)
     batch = args.batch
+    text_batch = -1
+    if args.static_text:
+        text_batch = batch
     if args.seperated:
         # convert visual transformer
         image_input = {"x": torch.randn(
@@ -66,13 +59,13 @@ if __name__ == '__main__':
         token_input = {"text": torch.randint(low=0, high=49407, size=(1, 77))}
         # openclip_text_encoder = ov.convert_model(t, example_input=token_input, input=(10,77))
         openclip_text_encoder = ov.convert_model(
-            t, example_input=token_input, input=(-1, 77))
+            t, example_input=token_input, input=(text_batch, 77))
         ov.save_model(openclip_text_encoder,
                       f"{args.output_path}/{model_id.lower().replace('-','_')}_text.xml")
     else:
         dummy_inputs = {
             "image": torch.randn(1, 3, 224, 224, dtype=torch.float32),
-            "text": torch.randint(low=0, high=49407, size=(-1, 77)),
+            "text": torch.randint(low=0, high=49407, size=(text_batch, 77)),
         }
         ov_model = ov.convert_model(
             model, example_input=dummy_inputs, input=([batch, 3, 224, 224], [10, 77]))
