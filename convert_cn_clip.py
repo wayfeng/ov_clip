@@ -47,6 +47,6 @@ if __name__ == '__main__':
     # convert text transformer
     token_input = {"text": torch.randint(low=672, high=21128, size=(1,52))}
     bert = Bert(model)
-    clip_text_encoder = ov.convert_model(bert, example_input=token_input, input=(-1, 52))
+    clip_text_encoder = ov.convert_model(bert, example_input=token_input, input=(1, 52))
     ov.save_model(clip_text_encoder, f"{args.output_path}/{model_id.lower().replace('-','_')}_text.xml")
 
