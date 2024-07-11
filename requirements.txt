@@ -1,5 +1,8 @@
-regex
 ftfy
-scipy
+gradio
+openvino==2024.1
 pillow
-openvino==2024.0
+pymilvus
+regex
+tqdm
+uuid
