@@ -1,5 +1,7 @@
 regex
+faiss-cpu
 ftfy
+gradio
 scipy
 pillow
-openvino==2024.0
+openvino==2024.4

@@ -1,4 +1,5 @@
-torch
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.3.1
 torchvision
-openvino==2024.0
+openvino==2024.4
 git+https://github.com/mlfoundations/open_clip@5f7892b672b21e6853d0f6c11b18dda9bcf36c8d
